@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kuis Pengawasan AR (Studi Kasus)</title>
+<style>
+:root{--bg:#f3f5f4;--card:#fff;--ink:#17211d;--mute:#5d6b65;--line:#d9e0dc;--brand:#0f5c4a;--brand2:#e6f2ee;--ok:#1b7f4b;--okbg:#e3f5ea;--bad:#b3261e;--badbg:#fbe8e6;--warn:#8a5a00;--warnbg:#fff4d6}
+@media(prefers-color-scheme:dark){:root{--bg:#101614;--card:#18211e;--ink:#e8efec;--mute:#9db0a8;--line:#2c3a35;--brand:#5fc3a5;--brand2:#1d2e29;--ok:#6fd39a;--okbg:#17332a;--bad:#ff8a80;--badbg:#3a1f1d;--warn:#f1c86b;--warnbg:#33290f}}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;overflow-x:hidden}
+.wrap{max-width:760px;margin:0 auto;padding:16px;padding-left:max(16px,env(safe-area-inset-left));padding-right:max(16px,env(safe-area-inset-right));padding-bottom:calc(32px + env(safe-area-inset-bottom))}
+h1{font-size:1.45rem;margin:8px 0 4px;line-height:1.25}
+.sub{color:var(--mute);margin:0 0 16px;font-size:.95rem}
+.bar{position:-webkit-sticky;position:sticky;top:0;z-index:5;background:var(--bg);padding:8px 0 10px;padding-top:calc(8px + env(safe-area-inset-top))}
+.prog{height:8px;background:var(--line);border-radius:4px;overflow:hidden}
+.prog i{display:block;height:100%;width:0;background:var(--brand);transition:width .2s}
+.pinfo{display:flex;justify-content:space-between;font-size:.85rem;color:var(--mute);margin-top:6px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px;margin:0 0 14px}
+.qn{font-weight:700;color:var(--brand);font-size:.9rem;margin-bottom:4px;display:flex;justify-content:space-between;gap:8px}
+.q{font-weight:600;margin:0 0 12px;white-space:pre-line}
+.opt{display:flex;align-items:flex-start;gap:10px;width:100%;text-align:left;font:inherit;color:inherit;background:var(--card);border:1.5px solid var(--line);border-radius:10px;padding:11px 12px;margin:0 0 8px;cursor:pointer;-webkit-appearance:none;appearance:none;min-height:44px;touch-action:manipulation}
+.opt .l{flex:0 0 26px;height:26px;border-radius:13px;background:var(--brand2);color:var(--brand);font-weight:700;font-size:.85rem;display:flex;align-items:center;justify-content:center}
+.opt.sel{border-color:var(--brand);background:var(--brand2)}
+.opt.ok{border-color:var(--ok);background:var(--okbg)}
+.opt.ok .l{background:var(--ok);color:#fff}
+.opt.bad{border-color:var(--bad);background:var(--badbg)}
+.opt.bad .l{background:var(--bad);color:#fff}
+.opt[disabled]{cursor:default;opacity:1}
+.badge{font-size:.78rem;padding:2px 9px;border-radius:20px;font-weight:700;white-space:nowrap}
+.b-ok{background:var(--okbg);color:var(--ok)}.b-bad{background:var(--badbg);color:var(--bad)}.b-skip{background:var(--warnbg);color:var(--warn)}
+.exp{border-left:4px solid var(--brand);background:var(--brand2);border-radius:8px;padding:10px 12px;margin-top:10px;font-size:.93rem}
+.exp.w{border-color:var(--bad);background:var(--badbg)}
+.exp b{display:block;margin-bottom:2px}
+.ref{font-size:.82rem;color:var(--mute);margin-top:6px;font-style:italic}
+.btns{display:flex;flex-wrap:wrap;gap:10px;margin:16px 0}
+.btn{flex:1 1 150px;font:inherit;font-weight:700;padding:13px 16px;border-radius:12px;border:1.5px solid var(--brand);background:var(--brand);color:#fff;cursor:pointer;-webkit-appearance:none;appearance:none;min-height:46px;touch-action:manipulation}
+.btn.s{background:transparent;color:var(--brand)}
+.btn[disabled]{opacity:.45}
+.res{text-align:center}
+.score{font-size:3rem;font-weight:800;line-height:1.1;color:var(--brand)}
+.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:14px 0 4px}
+.grid div{background:var(--brand2);border-radius:10px;padding:10px 4px}
+.grid b{display:block;font-size:1.35rem}.grid span{font-size:.8rem;color:var(--mute)}
+.tabs{display:flex;gap:8px;margin:0 0 14px}
+.tab{flex:1;font:inherit;font-weight:600;padding:10px;border-radius:10px;border:1.5px solid var(--line);background:var(--card);color:var(--ink);-webkit-appearance:none;appearance:none;min-height:44px}
+.tab.on{background:var(--brand);color:#fff;border-color:var(--brand)}
+.hide{display:none}
+.hist{font-size:.85rem;color:var(--mute);text-align:center;margin-top:6px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Kuis Pengawasan AR</h1>
+  <p class="sub">60 soal studi kasus pengawasan (tingkat menengah) dari PDF. Urutan soal dan pilihan diacak setiap sesi.</p>
+  <div class="bar">
+    <div class="prog"><i id="pb"></i></div>
+    <div class="pinfo"><span id="pt">Terjawab 0/60</span><span id="ph"></span></div>
+  </div>
+  <div id="result" class="card res hide"></div>
+  <div id="tabs" class="tabs hide">
+    <button class="tab on" data-f="all" type="button">Semua soal</button>
+    <button class="tab" data-f="wrong" type="button">Hanya yang salah</button>
+  </div>
+  <div id="list"></div>
+  <div class="btns">
+    <button id="bCheck" class="btn" type="button">Periksa Jawaban</button>
+    <button id="bShow" class="btn s" type="button">Tampilkan Jawaban</button>
+    <button id="bRestart" class="btn s" type="button">Ulangi Kuis (Acak Baru)</button>
+  </div>
+</div>
+<script>
+(function(){
+"use strict";
+var R="Sumber: pembahasan pada soal latihan (PDF)";
+// [soal, [pilihan A-D asli], indeks jawaban benar, pembahasan, referensiDariPDF]
+var D=[
+["PT Andalas Mineral bergerak di bidang pertambangan nikel.\nData yang tersedia bagi AR:\n• Omzet SPT Tahunan PPh Badan: Rp240 miliar\n• DPP PPN setahun: Rp239 miliar\n• Data ekspor dari instansi lain menunjukkan nilai FOB Rp295 miliar\n• CRM menunjukkan risiko tinggi pada pengujian omzet\n• NPM perusahaan 2%\n• Benchmark industri nikel berada pada kisaran 8%-20%\nTindakan yang PALING tepat dilakukan AR adalah:",["Mengusulkan pemeriksaan seluruh jenis pajak","Menyusun LHPt dan menerbitkan SP2DK dengan fokus pengujian omzet serta rekonsiliasi data ekspor","Menetapkan kurang bayar berdasarkan data ekspor","Mengusulkan penghapusan NPWP"],1,"Ada indikator risiko (selisih omzet dengan nilai ekspor, NPM jauh di bawah benchmark, CRM risiko tinggi), tetapi belum ada data konkret yang langsung membuktikan kurang bayar. Menurut kerangka pengawasan PMK 111, AR menyusun penelitian, menuangkannya dalam LHPt, lalu menyampaikan SP2DK. Pemeriksaan belum menjadi langkah pertama."],
+["PT Surya Digital memiliki data sebagai berikut:\n• Biaya pegawai laporan laba rugi Rp45 miliar\n• Akumulasi DPP PPh 21 Rp32 miliar\n• Tidak teridentifikasi pembayaran natura signifikan\n• Industri sejenis menggunakan biaya SDM sebagai komponen utama usaha\nPotensi yang paling layak diuji oleh AR adalah:",["PPh Final UMKM","Penghasilan pegawai yang belum dipotong PPh 21","PPN atas ekspor","PBB"],1,"Selisih Rp45 miliar - Rp32 miliar = Rp13 miliar. Selisih besar ini mengindikasikan gaji/honorarium/tenaga ahli yang belum dilaporkan atau objek PPh 21 lainnya, sehingga fokus pengawasan yang logis adalah kepatuhan PPh Pasal 21."],
+["PT Maju Bersama memperoleh omzet Rp70 miliar.\nData faktur masukan menunjukkan pembelian sebesar Rp68 miliar.\nSedangkan laba bruto yang dilaporkan hanya Rp1 miliar.\nBenchmark GPM industri sebesar 15%-30%.\nKesimpulan awal AR yang paling tepat adalah:",["Wajib Pajak pasti melakukan penggelapan","Risiko rendah karena pembelian tinggi","Terdapat indikasi biaya atau HPP yang perlu diuji lebih lanjut","Langsung usulkan pemeriksaan transfer pricing"],2,"GPM WP = 1/70 = 1,4%, jauh di bawah benchmark 15%-30%. Perbedaan material ini menunjukkan risiko, tetapi AR tidak boleh langsung menyimpulkan penggelapan. Tahap pertama adalah penelitian dan klarifikasi."],
+["PT Nusantara Teknik teridentifikasi memiliki transaksi afiliasi sebesar Rp180 miliar.\nRasio:\n• Operating Margin 1%\n• Benchmark independen 7%-12%\nMetode pengawasan pertama yang paling tepat adalah:",["Menguji kewajaran transaksi afiliasi","Menetapkan koreksi transfer pricing","Menolak seluruh biaya afiliasi","Mengusulkan penyidikan"],0,"Selisih profitabilitas terhadap benchmark hanya indikator risiko. AR perlu mengidentifikasi hubungan istimewa, menilai fungsi, aset, dan risiko, lalu menguji kewajaran transaksi. Koreksi belum dapat langsung dilakukan."],
+["Hasil CRM menunjukkan kuadran merah.\nData lain:\n• SPT selalu nihil\n• Omzet meningkat drastis\n• Faktur keluaran naik 250%\n• Pembayaran pajak tetap sama\nLangkah yang paling tepat adalah:",["Mengabaikan CRM","Menyusun DPP dan melakukan penelitian mendalam","Menghapus NPWP","Langsung menerbitkan SKPKB"],1,"CRM kuadran merah adalah sinyal risiko tinggi, tetapi CRM bukan hasil pemeriksaan. AR menjadikannya dasar untuk DPP, penelitian, LHPt, dan SP2DK."],
+["PT Alpha melaporkan:\n• Omzet Rp120 miliar\n• Ekspor Rp100 miliar\n• Penjualan DN Rp20 miliar\nNamun faktur keluaran domestik hanya Rp5 miliar.\nRisiko utama yang perlu diuji adalah:",["Kelebihan bayar PPh 22","Penjualan domestik belum seluruhnya dipungut PPN","Natura","PBB"],1,"Penjualan domestik Rp20 miliar tetapi faktur hanya Rp5 miliar, sehingga Rp15 miliar penyerahan domestik belum difakturkan. Fokus pengawasan menjadi kepatuhan PPN."],
+["PT Delta memiliki:\n• Piutang usaha naik 300%\n• Omzet naik 10%\n• Arus kas penjualan turun\nBagi AR, kondisi tersebut paling tepat diperlakukan sebagai:",["Risiko yang perlu diteliti","Bukti kurang bayar","Bukti pidana","Tidak relevan"],0,"Analisis tren menunjukkan ketidakwajaran, tetapi hanya berupa red flag. Kondisi ini belum dapat dianggap sebagai bukti pelanggaran."],
+["(Perhitungan) Diketahui:\n• Biaya pegawai menurut laba rugi Rp98 miliar\n• Akumulasi DPP PPh 21 Rp88 miliar\nJika seluruh selisih merupakan objek PPh 21 dan digunakan tarif OP terendah 5%, maka potensi PPh kurang bayar adalah:",["Rp250 juta","Rp400 juta","Rp500 juta","Rp750 juta"],2,"Selisih: Rp98 - Rp88 = Rp10 miliar. Potensi PPh: Rp10 miliar × 5% = Rp500 juta."],
+["(PMK 111) Dalam pengawasan wilayah melalui KPD, informasi menunjukkan terdapat pusat distribusi besar yang belum memiliki NPWP.\nTindakan paling sesuai bagi AR adalah:",["Langsung menerbitkan SKPKB","Melakukan KPD kewilayahan sebagai dasar tindak lanjut ekstensifikasi","Menetapkan sebagai WP NE","Menghapus data"],1,"Tujuan KPD kewilayahan adalah menemukan subjek pajak, objek pajak, dan kegiatan ekonomi. Temuannya kemudian digunakan dalam proses ekstensifikasi."],
+["(Level Advance) PT Garuda Steel melaporkan:\n• Omzet Rp500 miliar\n• Laba bersih Rp2 miliar\n• Data ILAP menunjukkan transaksi Rp630 miliar\n• CRM risiko tinggi pada omzet\n• Benchmark NPM industri 5%-12%\n• NPM WP 0,4%\nKesimpulan pengawasan yang paling tepat adalah:",["Wajib Pajak pasti melakukan penghindaran pajak","Terdapat kombinasi risiko omzet dan profitabilitas yang cukup untuk penyusunan LHPt dan SP2DK","Langsung dilakukan penetapan pajak","Langsung usulkan penyidikan"],1,"Ada tiga sumber risiko sekaligus: selisih data ILAP, CRM risiko tinggi, dan NPM jauh di bawah benchmark. Gabungannya cukup kuat untuk masuk DPP, menyusun LHPt, dan menerbitkan SP2DK, tetapi belum cukup untuk langsung menetapkan kurang bayar."],
+["PT Bara Energi melaporkan data sebagai berikut:\n• Omzet SPT Tahunan: Rp180 miliar\n• DPP PPN: Rp179,5 miliar\n• Pembelian menurut faktur masukan: Rp170 miliar\n• GPM perusahaan: 5%\n• Benchmark GPM industri batubara: 15%-25%\nKesimpulan awal AR yang paling tepat adalah:",["Tidak terdapat risiko karena omzet PPh dan PPN telah sesuai","Risiko utama terdapat pada kewajaran HPP yang menyebabkan laba bruto sangat rendah","Langsung usulkan pemeriksaan transfer pricing","Langsung terbitkan SKPKB"],1,"Kesesuaian omzet PPh dan PPN tidak otomatis menunjukkan kepatuhan. Yang janggal adalah GPM 5% versus benchmark 15%-25%, sehingga fokus bergeser ke HPP, biaya produksi, transaksi afiliasi pemasok, dan kemungkinan pembebanan biaya tidak wajar. AR menguji penyebabnya dalam LHPt sebelum menyimpulkan ketidakpatuhan."],
+["PT Nusantara Logistik memiliki data:\n• Biaya pegawai Rp72 miliar\n• DPP PPh 21 Rp69 miliar\n• Biaya jasa outsourcing Rp18 miliar\n• Tidak terdapat bukti potong PPh 23 atas outsourcing\nRisiko yang paling signifikan untuk diuji terlebih dahulu adalah:",["PPh Pasal 25","PPN Keluaran","PPh Pasal 23 atas jasa outsourcing","PBB"],2,"Selisih biaya pegawai relatif kecil, sedangkan biaya outsourcing Rp18 miliar tanpa bukti potong PPh 23 adalah risiko yang lebih konkret. SP2DK diarahkan pada dasar pembayaran jasa, identitas vendor, dan pemotongan PPh 23."],
+["PT Prima Kimia memperoleh fasilitas tax holiday.\nCRM menunjukkan risiko tinggi pada akun biaya royalti kepada afiliasi luar negeri.\nLangkah awal yang paling tepat adalah:",["Menolak seluruh biaya royalti","Menguji substansi ekonomi dan kewajaran pembayaran royalti","Menetapkan koreksi transfer pricing","Mengusulkan penyidikan"],1,"Royalti afiliasi adalah area risiko transfer pricing, tetapi AR tidak dapat langsung mengoreksi. Penelitian harus menjawab apakah hak kekayaan intelektual benar ada, apakah digunakan, dan apakah tarif royalti memenuhi arm's length. Ini menjadi materi utama LHPt dan SP2DK."],
+["Dalam pengawasan, AR menemukan:\n• Omzet fiskal Rp80 miliar\n• Pembelian Rp20 miliar\n• Penjualan online marketplace Rp125 miliar\nData marketplace telah tervalidasi.\nRisiko utama yang muncul adalah:",["Understatement omzet","Overstatement biaya pegawai","PPN Masukan fiktif","Kesalahan PTKP"],0,"Selisih Rp125 miliar - Rp80 miliar = Rp45 miliar, sangat material. Data marketplace yang tervalidasi menjadi indikasi kuat bahwa omzet perlu diklarifikasi. Fokus SP2DK adalah rekonsiliasi omzet."],
+["PT Graha Konstruksi melaporkan:\n• Nilai proyek Rp150 miliar\n• Piutang akhir tahun Rp90 miliar\n• Omzet hanya Rp40 miliar\nMenurut kontrak proyek, progres penyelesaian telah mencapai 80%.\nIndikasi utama yang perlu diuji AR adalah:",["Pengakuan pendapatan belum sesuai progres pekerjaan","PBB bangunan","PPh Pasal 21","Pajak daerah"],0,"Pada proyek konstruksi, pengakuan pendapatan mengikuti progres. Progres 80% dengan omzet rendah membuka kemungkinan penundaan pengakuan pendapatan, manajemen laba, atau tax deferral. Fokus penelitian adalah metode pengakuan pendapatan."],
+["(Perhitungan) PT Sentosa memiliki:\n• Omzet Rp60 miliar\n• Laba bersih Rp1,2 miliar\nHitung NPM perusahaan.",["1%","2%","3%","4%"],1,"NPM = 1.200.000.000 / 60.000.000.000 = 2%. Jika benchmark industri lebih tinggi, kondisi ini dapat menjadi indikator risiko bagi AR."],
+["(Perhitungan Analitis) WP melaporkan:\n• Pajak terutang Rp9 miliar\n• Kredit pajak Rp8,2 miliar\nBerapa jumlah kurang bayar yang seharusnya tersedia dalam sistem sebelum SPT diterima?",["Rp600 juta","Rp700 juta","Rp800 juta","Rp900 juta"],2,"9.000.000.000 - 8.200.000.000 = Rp800.000.000. Dalam penelitian formal SPT KB, petugas memastikan pembayaran minimal sebesar jumlah kurang bayar tersebut."],
+["PT Baja Makmur memiliki:\n• NPM 0,5%\n• Benchmark industri 8%-12%\n• CRM kuadran merah\n• Data perbankan menunjukkan mutasi Rp900 miliar\n• Omzet dilaporkan Rp650 miliar\nKesimpulan AR yang paling tepat adalah:",["Risiko rendah karena perusahaan masih mencatat laba","Terdapat kombinasi risiko omzet dan profitabilitas yang tinggi","Langsung terbitkan SKPKB","Langsung usulkan penyidikan"],1,"Ada tiga red flag sekaligus: NPM sangat rendah, selisih omzet dengan mutasi bank, dan CRM kuadran merah. Gabungannya cukup untuk prioritas tinggi dalam DPP, tetapi belum menjadi dasar penetapan pajak."],
+["PT Delta Food memperoleh transaksi afiliasi pembelian bahan baku sebesar 85% dari total pembelian.\nPerusahaan mengalami rugi selama 4 tahun berturut-turut.\nAnalisis awal yang paling tepat adalah:",["Tidak ada risiko karena rugi fiskal diperbolehkan","Terdapat indikasi transaksi afiliasi yang perlu diuji kewajarannya","Langsung koreksi seluruh pembelian","Langsung dilakukan penyidikan TP"],1,"Ciri klasik risiko transfer pricing: transaksi afiliasi dominan, rugi berulang, dan industri sebenarnya masih tumbuh. Langkah pertama adalah menguji arm's length principle, bukan langsung mengoreksi."],
+["(Regulasi PMK 111 / Pengawasan) Dalam pelaksanaan pengawasan, AR menerima data hasil CRM yang menunjukkan risiko tinggi terhadap omzet suatu WP. Data tersebut belum dapat dikategorikan sebagai data konkret.\nTindak lanjut yang paling sesuai adalah:",["Menerbitkan SKPKB","Menyusun LHPt dan melakukan pengawasan melalui SP2DK","Langsung mengusulkan penyidikan","Menetapkan kurang bayar berdasarkan CRM"],1,"CRM adalah alat manajemen risiko yang menghasilkan prioritas, indikasi, dan arah pengawasan, bukan alat pembuktian. Alur yang benar: CRM → Penelitian → LHPt → SP2DK → Evaluasi Respons WP → Tindak Lanjut berikutnya, bukan CRM → SKPKB atau CRM → Penyidikan. Ini sering menjadi jebakan pada soal UKOM AR tingkat lanjut."],
+["PT Samudera Logistic memiliki data:\n• Omzet SPT Tahunan: Rp320 miliar\n• DPP PPN: Rp319 miliar\n• Beban BBM: Rp98 miliar\n• Beban pemeliharaan armada: Rp65 miliar\n• NPM: 0,8%\n• Benchmark industri: 4%-8%\nData GPS armada menunjukkan tingkat utilisasi hanya 55%.\nPotensi risiko yang paling layak diuji adalah:",["Omzet tidak dilaporkan seluruhnya","Kewajaran biaya operasional armada","PPh Final jasa konstruksi","PBB sektor P5L"],1,"Omzet PPh dan PPN relatif konsisten, tetapi laba sangat rendah dan biaya operasional armada besar dibanding utilisasi. AR menguji beban BBM dan pemeliharaan (jumlah kendaraan, kilometer operasional, konsumsi BBM) dan kemungkinan biaya yang tidak berhubungan langsung dengan usaha. Fokus SP2DK adalah kewajaran biaya."],
+["PT Sinar Retail memiliki:\n• Omzet fiskal Rp85 miliar\n• Data merchant acquiring Rp117 miliar\n• Seluruh pembayaran menggunakan kartu dan QRIS\n• CRM risiko tinggi omzet\nSimpulan awal yang paling tepat adalah:",["Data merchant pasti merupakan omzet","Terdapat indikasi omzet belum seluruhnya dilaporkan yang perlu diklarifikasi","Langsung usulkan pemeriksaan","Langsung terbitkan SKPKB"],1,"AR tidak boleh langsung menganggap seluruh mutasi merchant sebagai omzet, tetapi selisih Rp32 miliar cukup material. AR perlu merekonsiliasi refund, transaksi antar rekening, dan transaksi titipan. Bila penjelasan WP tidak memadai, risiko meningkat."],
+["PT Karya Properti menerbitkan faktur pajak digunggung.\nDalam masterfile, KLU terdaftar adalah penjualan rumah komersial.\nLangkah pertama yang paling tepat adalah:",["Menolak seluruh Pajak Masukan lawan transaksi","Menerbitkan SP2DK","Menguji kesesuaian antara KLU dan kegiatan usaha sebenarnya","Menetapkan kurang bayar"],2,"AR tidak boleh langsung berasumsi terjadi kesalahan. Langkah awal adalah memastikan kegiatan usaha riil, status objek, dan perlakuan PPN yang tepat, baru kemudian menentukan tindak lanjut."],
+["PT Agro Lestari mengalami rugi fiskal selama 5 tahun berturut-turut.\nNamun diketahui:\n• Grup perusahaan mencatat laba besar.\n• PT Agro membeli 90% bahan baku dari perusahaan afiliasi.\n• Harga beli lebih tinggi dari benchmark pasar.\nRisiko utama yang muncul adalah:",["Thin capitalization","Transfer pricing pembelian","PPh Pasal 21","PBB"],1,"Ciri klasik transfer pricing: transaksi afiliasi dominan, rugi berulang, dan harga tidak sesuai benchmark. Fokus AR adalah menguji arm's length price."],
+["PT Bintang Elektronik memiliki:\n• Omzet Rp180 miliar\n• Piutang awal Rp25 miliar\n• Piutang akhir Rp105 miliar\nSementara pertumbuhan omzet hanya 6%.\nIndikasi yang paling relevan adalah:",["Potensi masalah pengakuan pendapatan atau kualitas piutang","PPN Masukan fiktif","PBB kurang dibayar","Penghasilan Final"],0,"Kenaikan piutang tidak sejalan dengan kenaikan omzet. AR perlu meneliti kualitas piutang, transaksi afiliasi, dan kemungkinan revenue timing."],
+["(Perhitungan) PT Delta melaporkan:\n• Omzet Rp250 miliar\n• Laba bersih Rp7,5 miliar\nNPM perusahaan adalah:",["2%","3%","4%","5%"],1,"NPM = 7,5/250 × 100% = 3%."],
+["(Perhitungan) Biaya pegawai menurut laporan laba rugi sebesar Rp54 miliar.\nDPP PPh 21 sebesar Rp49 miliar.\nApabila seluruh selisih diasumsikan objek PPh 21 dan tarif efektif digunakan 5%, estimasi potensi pajak adalah:",["Rp150 juta","Rp200 juta","Rp250 juta","Rp300 juta"],2,"Selisih: Rp54 miliar - Rp49 miliar = Rp5 miliar. Potensi: Rp5 miliar × 5% = Rp250 juta."],
+["PT Mega Steel memperoleh pembiayaan dari pemegang saham.\nRasio utang terhadap modal meningkat menjadi 12:1.\nBeban bunga naik tajam dan menyebabkan rugi fiskal.\nRisiko yang paling tepat diuji adalah:",["Transfer pricing jasa","Thin capitalization","PPh Pasal 23","PPN Keluaran"],1,"Ciri thin capitalization: pendanaan dominan berupa utang, beban bunga besar, dan laba fiskal tertekan. AR perlu menguji kewajaran struktur pendanaan."],
+["PT Nusantara Food menunjukkan:\n• Omzet naik 40%\n• Pembelian naik 200%\n• Persediaan turun\nAnalisis awal yang paling tepat adalah:",["Risiko atas kewajaran HPP dan persediaan","Risiko PBB","Risiko PPh 21","Tidak ada risiko"],0,"Kenaikan pembelian tidak sejalan dengan omzet. AR perlu meneliti mutasi persediaan, kemungkinan pencatatan biaya berlebih, dan transaksi afiliasi."],
+["Hasil CRM menunjukkan WP berada pada kuadran kuning.\nSkor risiko utama berasal dari akun biaya pemasaran.\nLangkah paling sesuai adalah:",["Mengusulkan penyidikan","Menyusun DPP dan penelitian terfokus terhadap biaya pemasaran","Langsung mengoreksi seluruh biaya","Menetapkan kurang bayar"],1,"CRM hanya menghasilkan prioritas. AR harus meneliti kontrak, vendor, bukti pembayaran, dan manfaat ekonomi biaya. Tindak lanjut awal tetap melalui penelitian dan SP2DK."],
+["PT Global Trading mempunyai:\n• Ekspor Rp400 miliar\n• Penjualan domestik Rp50 miliar\n• Pajak Masukan besar dan terus restitusi\nNamun volume produksi tidak meningkat.\nRisiko utama yang perlu diuji adalah:",["Kesesuaian antara volume produksi dan nilai ekspor","PPh Pasal 21","PBB","STP"],0,"Data produksi harus sejalan dengan ekspor. Jika ekspor meningkat tetapi kapasitas tetap, AR perlu menguji sumber barang, dokumen ekspor, dan kewajaran transaksi."],
+["PT Kencana Media membayar jasa kepada perusahaan afiliasi Singapura sebesar Rp28 miliar.\nTidak tersedia dokumen manfaat jasa (benefit test).\nFokus pengawasan utama adalah:",["Uji manfaat ekonomi jasa intragroup","Pemeriksaan PBB","Penghapusan NPWP","PPh Final UMKM"],0,"Pada transaksi jasa afiliasi luar negeri, benefit test adalah area pengujian utama: apakah jasa benar diberikan, apakah diperlukan, dan apakah nilainya wajar."],
+["Hasil KPD kewilayahan menemukan pusat distribusi besar yang aktif beroperasi namun belum memiliki NPWP.\nTindak lanjut paling tepat adalah:",["Pemeriksaan bukper","Ekstensifikasi subjek pajak","SP2DK","SKPKB"],1,"Temuan KPD kewilayahan umumnya mengarah pada pencarian subjek pajak, pencarian objek pajak, dan ekstensifikasi."],
+["PT Citra Medika melaporkan:\n• Omzet Rp75 miliar\n• Mutasi rekening usaha Rp210 miliar\nDokumen awal menunjukkan rekening juga digunakan untuk transaksi pinjaman antarpihak.\nSikap AR yang paling tepat adalah:",["Menganggap seluruh mutasi adalah omzet","Melakukan rekonsiliasi transaksi rekening","Langsung usulkan pemeriksaan","Tetapkan pajak"],1,"Mutasi rekening bukan omzet. AR harus memisahkan pinjaman, transfer internal, setoran modal, dan pendapatan usaha."],
+["(PMK 111) Dalam pengawasan WP terdaftar, tujuan utama penelitian data adalah:",["Menghasilkan SKPKB","Memastikan seluruh WP diperiksa","Mengidentifikasi indikasi kepatuhan atau ketidakpatuhan sebagai dasar tindak lanjut","Menetapkan sanksi"],2,"Esensi pengawasan dalam PMK 111 adalah penelitian, identifikasi risiko, dan penentuan tindak lanjut yang proporsional. Pengawasan tidak identik dengan penetapan pajak."],
+["(Perhitungan) PT Garuda memiliki:\n• Pajak terutang Rp11,5 miliar\n• Kredit pajak Rp10,7 miliar\nKurang bayar yang harus tersedia dalam sistem adalah:",["Rp500 juta","Rp700 juta","Rp800 juta","Rp900 juta"],2,"11,5 - 10,7 = 0,8 miliar = Rp800 juta."],
+["PT Alfa Textile mengalami:\n• Penjualan naik 15%\n• Laba bruto turun 70%\n• Harga jual produk stabil\nRisiko utama yang perlu diuji adalah:",["Lonjakan HPP","PBB","PPh Final","PPh 21"],0,"Jika harga jual relatif stabil tetapi laba bruto turun drastis, masalah kemungkinan ada pada biaya produksi, bahan baku, dan transaksi afiliasi."],
+["PT Borneo Mineral menunjukkan:\n• NPM 1,2%\n• Benchmark industri 10%-18%\n• CRM merah\n• Data ekspor berbeda material dengan laporan fiskal\nPrioritas AR adalah:",["Menutup kasus karena sudah ada CRM","Menyusun LHPt dan SP2DK berbasis kombinasi risiko","Langsung pemeriksaan bukper","SKPKB"],1,"Ini contoh klasik DPP: tiga indikator risiko independen muncul bersamaan sehingga layak diprioritaskan."],
+["Dalam penelitian SP2DK, WP tidak dapat menjelaskan selisih omzet Rp25 miliar antara data marketplace dan SPT.\nTindak lanjut yang paling logis adalah:",["Menutup SP2DK","Meningkatkan risiko untuk tindak lanjut berikutnya","Menghapus NPWP","Menetapkan pajak secara sepihak"],1,"Ketidakmampuan menjelaskan data material meningkatkan kualitas risiko. Namun AR tetap harus mengikuti prosedur pengawasan lebih lanjut."],
+["PT Arunika memiliki:\n• Omzet Rp140 miliar\n• Biaya promosi Rp52 miliar\n• Industri rata-rata 6%-10% omzet\nRasio promosi perusahaan mencapai 37%.\nRisiko yang paling tepat diuji adalah:",["Kewajaran biaya promosi","Kewajaran PBB","PPh Final UMKM","Pajak Karbon"],0,"Biaya promosi 37% omzet adalah outlier signifikan. Dalam SP2DK, AR akan meminta kontrak, invoice, bukti pembayaran, dan manfaat ekonomi atas promosi tersebut."],
+["PT Cakrawala Mining melaporkan:\n• Omzet: Rp420 miliar\n• Laba bersih: Rp3,36 miliar\n• NPM: 0,8%\n• Benchmark industri: 8%-15%\n• Terdapat pembayaran jasa manajemen kepada afiliasi luar negeri sebesar Rp45 miliar\n• Tidak tersedia transfer pricing documentation saat diminta AR\nRisiko utama yang seharusnya menjadi fokus AR adalah:",["PPh Pasal 21 atas karyawan asing","Kewajaran jasa manajemen afiliasi dan pengaruhnya terhadap profitabilitas","PBB sektor pertambangan","PPN ekspor"],1,"Ada dua red flag: NPM jauh di bawah benchmark dan biaya jasa manajemen afiliasi yang sangat material. AR akan menguji manfaat jasa (benefit test), kebutuhan bisnis, kewajaran nilai jasa, serta hubungan antara biaya afiliasi dan rendahnya profitabilitas."],
+["PT Nusantara Teknik memiliki data:\n• Omzet Rp120 M\n• DPP PPN Rp120 M\n• Biaya Pegawai Rp18 M\n• DPP PPh 21 Rp8 M\nPotensi risiko utama adalah:",["Omzet belum dilaporkan","PPh 21 belum dipotong atas sebagian pembayaran SDM","PPN keluaran kurang dipungut","PBB kurang dibayar"],1,"Selisih Rp18 miliar - Rp8 miliar = Rp10 miliar (sekitar 55,6% dari biaya pegawai), tergolong material. AR wajar mengevaluasi honorarium, tenaga ahli, pegawai tidak tetap, dan natura yang sebenarnya merupakan objek pajak."],
+["Dalam penelitian SP2DK, WP dapat menjelaskan seluruh selisih omzet antara data marketplace dan SPT dengan dokumen yang memadai.\nSikap AR yang paling tepat adalah:",["Tetap mengusulkan pemeriksaan","Menetapkan kurang bayar","Menyimpulkan penjelasan memadai dan menutup pengawasan","Menghapus NPWP"],2,"Tujuan SP2DK adalah memperoleh klarifikasi. Jika data valid, dokumen memadai, dan seluruh perbedaan dapat dijelaskan, pengawasan dapat dihentikan tanpa tindak lanjut lain."],
+["PT Arjuna Steel memiliki:\n• Penjualan Rp300 miliar\n• HPP Rp285 miliar\n• GPM 5%\nBenchmark industri baja: GPM 15%-22%\nPertanyaan paling penting dalam SP2DK adalah:",["Apakah WP memiliki kendaraan operasional","Mengapa margin laba bruto berada jauh di bawah benchmark industri","Apakah WP melaporkan PBB","Apakah telah menyampaikan SPT Masa PPh 21"],1,"Gap benchmark sangat material. Fokus AR adalah memahami penyebabnya: harga jual rendah, HPP tinggi, pembelian afiliasi, atau strategi bisnis tertentu."],
+["(Perhitungan) PT Delta Logistik memiliki:\n• Omzet Rp160 miliar\n• Laba bersih Rp4 miliar\nNPM perusahaan adalah:",["1,5%","2%","2,5%","3%"],2,"NPM = 4/160 × 100% = 2,5%."],
+["PT Indonesia Food melaporkan:\n• Omzet Rp70 miliar\n• Pembelian Rp68 miliar\n• GPM 2,8%\nData CRM menunjukkan risiko tinggi akun pembelian.\nFokus pengujian yang paling tepat adalah:",["PBB","Kewajaran pembelian dan HPP","PPh Pasal 26","Penghasilan final"],1,"CRM dan GPM sama-sama mengarah pada area yang sama: pembelian, HPP, dan margin usaha. Fokus pengawasan sebaiknya konsisten dengan sumber risiko tersebut."],
+["Dalam KPD Kewilayahan ditemukan pabrik aktif beroperasi tetapi belum terdaftar sebagai PKP, sementara omzet diperkirakan Rp25 miliar setahun.\nTindak lanjut paling tepat adalah:",["Mengusulkan proses pengukuhan PKP sesuai ketentuan","Langsung menerbitkan SKPKB","Langsung pemeriksaan bukper","Menunggu pelaporan sukarela"],0,"Temuan kewilayahan digunakan sebagai dasar ekstensifikasi, pengukuhan, dan pembaruan data administrasi, bukan langsung penetapan pajak."],
+["PT Garuda Retail memiliki:\n• Omzet Rp90 miliar\n• Mutasi rekening Rp260 miliar\nDari penelitian awal diketahui:\n• Rp130 miliar merupakan transfer antar rekening sendiri.\nTindakan AR yang paling tepat adalah:",["Menganggap mutasi Rp260 miliar sebagai omzet","Melanjutkan rekonsiliasi transaksi lainnya sebelum menarik kesimpulan","Menetapkan omzet Rp260 miliar","Menutup kasus"],1,"Mutasi rekening memerlukan cleansing data. Prinsip AR: identifikasi transaksi non-omzet terlebih dahulu sebelum menghitung potensi selisih omzet."],
+["PT Trijaya Motor mengalami:\n• Omzet naik 8%\n• Persediaan naik 240%\n• Pembelian naik 220%\nKondisi tersebut paling mengarah pada:",["Risiko pada akun persediaan dan HPP","Risiko PPh Pasal 21","Risiko pajak karbon","Risiko PBB"],0,"Lonjakan persediaan jauh melebihi pertumbuhan omzet. AR perlu menguji perputaran persediaan, metode pencatatan, pembelian afiliasi, dan slow moving stock."],
+["(PMK 111) Menurut konsep pengawasan berbasis risiko, CRM digunakan untuk:",["Menetapkan kurang bayar","Menentukan prioritas pengawasan","Menggantikan pemeriksaan","Menetapkan sanksi administrasi"],1,"CRM menghasilkan skor risiko, prioritas, dan fokus pengujian. CRM bukan bukti pelanggaran."],
+["PT Global Mineral:\n• NPM 1%\n• Benchmark 12%\n• Omzet Rp600 miliar\nBerapa laba yang seharusnya diperoleh jika menggunakan batas bawah benchmark 12%?",["Rp36 miliar","Rp48 miliar","Rp60 miliar","Rp72 miliar"],3,"600 × 12% = Rp72 miliar sebagai laba benchmark, sedangkan laba aktual 600 × 1% = Rp6 miliar. Gap laba yang sangat besar layak menjadi objek analisis AR."],
+["PT Sejahtera Abadi membayar royalti kepada afiliasi luar negeri sebesar Rp20 miliar.\nRoyalti tersebut menyebabkan laba fiskal turun hingga hampir nihil.\nPertanyaan pertama yang harus dijawab AR adalah:",["Apakah telah dibayar menggunakan USD","Apakah terdapat manfaat ekonomi yang diterima WP","Apakah perusahaan diaudit","Apakah memiliki NPWP"],1,"Dalam pengujian royalti afiliasi, benefit test hampir selalu menjadi area pertama yang diuji."],
+["WP tidak memberikan tanggapan SP2DK hingga batas waktu berakhir dan tidak mengajukan perpanjangan.\nTindakan yang paling tepat adalah:",["Menutup kasus","Mendokumentasikan hasil pengawasan dan mempertimbangkan tindak lanjut sesuai risiko","Menghapus NPWP","Menerbitkan SKPKB"],1,"Ketidakresponsifan WP bukan dasar otomatis penerbitan SKPKB, tetapi menjadi faktor penting dalam penilaian risiko dan tindak lanjut berikutnya."],
+["PT Artha Properti memiliki:\n• Omzet Rp140 miliar\n• Biaya pemasaran Rp50 miliar\n• Benchmark biaya pemasaran industri 7%-12%\nRasio biaya pemasaran perusahaan adalah:",["15,7%","21,7%","35,7%","45,7%"],2,"50/140 × 100% = 35,7%, jauh di atas benchmark sehingga layak diuji."],
+["Hasil penelitian menunjukkan CRM merah berasal dari:\n• risiko omzet;\n• risiko transfer pricing;\n• risiko PPh 21.\nLangkah penyusunan SP2DK yang paling tepat adalah:",["Fokus satu isu saja","Mengakomodasi seluruh isu material yang didukung data penelitian","Hanya mengikuti CRM tertinggi","Tidak perlu SP2DK"],1,"SP2DK yang baik harus mencerminkan hasil penelitian yang lengkap dan berbasis data."],
+["PT Karya Nusantara melaporkan rugi Rp8 miliar.\nNamun:\n• Direktur memperoleh dividen besar dari perusahaan afiliasi.\n• Perusahaan melakukan transaksi mayoritas dengan afiliasi.\nIndikasi yang perlu diperhatikan AR adalah:",["Transfer pricing dan profit shifting","PBB","Natura pegawai","Pajak karbon"],0,"Kombinasi rugi perusahaan dan keuntungan yang berpindah ke entitas afiliasi adalah pola yang sering muncul dalam pengujian transfer pricing."],
+["(Perhitungan) Biaya pegawai menurut laba rugi: Rp84 miliar\nDPP PPh 21: Rp74 miliar\nPotensi objek yang belum tercermin dalam PPh 21 sebesar:",["Rp8 miliar","Rp9 miliar","Rp10 miliar","Rp12 miliar"],2,"84 - 74 = 10, jadi potensi selisih Rp10 miliar."],
+["Dari hasil benchmarking ditemukan bahwa seluruh rasio WP masih berada dalam rentang industri.\nNamun CRM menunjukkan risiko sedang.\nPendekatan yang paling tepat adalah:",["Tetap melakukan penelitian untuk memahami penyebab risiko CRM","Mengabaikan CRM","Langsung menutup tanpa penelitian","Pemeriksaan penuh"],0,"CRM dan benchmarking saling melengkapi. AR perlu memahami mengapa CRM tetap menghasilkan skor risiko."],
+["Pada saat menyusun LHPt, tujuan utama AR adalah:",["Menetapkan jumlah pajak kurang bayar","Mendokumentasikan hasil penelitian dan dasar tindak lanjut","Menggantikan pemeriksaan","Menjatuhkan sanksi"],1,"LHPt adalah dokumentasi formal yang menjelaskan data yang dianalisis, risiko yang ditemukan, dan dasar tindakan pengawasan."],
+["PT Merah Putih menunjukkan:\n• NPM 0,6%\n• Benchmark 10%\n• Selisih omzet marketplace Rp40 miliar\n• CRM merah\n• Tidak memberikan tanggapan SP2DK\nKesimpulan AR yang paling tepat adalah:",["Risiko tinggi yang layak menjadi prioritas tindak lanjut lanjutan","Tidak ada masalah karena belum ada pemeriksaan","Kasus harus ditutup","Langsung diterbitkan putusan pajak"],0,"Ada empat indikator risiko sekaligus: profitabilitas jauh di bawah benchmark, selisih omzet material, CRM merah, dan tidak kooperatif dalam SP2DK. Kombinasi ini biasanya menempatkan WP pada prioritas tinggi dalam DPP dan menjadi kandidat kuat untuk tindak lanjut yang lebih mendalam."]
+];
+var LS="kuisPajakV2",L=["A","B","C","D"];
+var S=null,filter="all";
+function $(id){return document.getElementById(id)}
+function shuf(a){a=a.slice();for(var i=a.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1)),t=a[i];a[i]=a[j];a[j]=t}return a}
+function esc(s){return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;")}
+function load(k){try{return JSON.parse(localStorage.getItem(k))}catch(e){return null}}
+function save(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}
+function newSession(){
+  var idx=[],i;for(i=0;i<D.length;i++)idx.push(i);
+  S={items:shuf(idx).map(function(n){
+    var o=[0,1,2,3],fixed=[],free=[];
+    o.forEach(function(k){(/^semua benar/i.test(D[n][1][k])?fixed:free).push(k)});
+    return{n:n,order:shuf(free).concat(fixed),sel:null};
+  }),checked:false,show:false};
+  filter="all";persist();
+}
+function persist(){save(LS+"_s",S)}
+function valid(s){return s&&s.items&&s.items.length===D.length}
+function stats(){var c=0,a=0;S.items.forEach(function(it){if(it.sel!==null){a++;if(it.sel===D[it.n][2])c++}});return{c:c,a:a,w:a-c,u:D.length-a}}
+function render(){
+  var st=stats(),h=load(LS+"_h")||{attempts:0,best:0};
+  $("pb").style.width=(st.a/D.length*100)+"%";
+  $("pt").textContent="Terjawab "+st.a+"/"+D.length;
+  $("ph").textContent="Percobaan: "+h.attempts+" · Terbaik: "+h.best+"%";
+  var html="";
+  S.items.forEach(function(it,pos){
+    var d=D[it.n],ok=it.sel===d[2],reveal=S.checked||S.show;
+    if(S.checked&&filter==="wrong"&&ok)return;
+    var badge="";
+    if(S.checked)badge=it.sel===null?'<span class="badge b-skip">Tidak dijawab</span>':ok?'<span class="badge b-ok">Benar</span>':'<span class="badge b-bad">Salah</span>';
+    html+='<div class="card"><div class="qn"><span>Soal '+(pos+1)+'</span>'+badge+'</div><p class="q">'+esc(d[0])+'</p>';
+    it.order.forEach(function(k,j){
+      var c="opt";
+      if(reveal){if(k===d[2])c+=" ok";else if(k===it.sel)c+=" bad"}
+      else if(k===it.sel)c+=" sel";
+      html+='<button type="button" class="'+c+'" data-p="'+pos+'" data-k="'+k+'"'+(S.checked?" disabled":"")+'><span class="l">'+L[j]+'</span><span>'+esc(d[1][k])+'</span></button>';
+    });
+    if(reveal){
+      var cj=it.order.indexOf(d[2]);
+      html+='<div class="exp"><b>Jawaban benar: '+L[cj]+'. '+esc(d[1][d[2]])+'</b>'+esc(d[3])+'<div class="ref">'+R+'</div>'+'</div>';
+      if(S.checked&&it.sel!==null&&!ok){
+        html+='<div class="exp w"><b>Mengapa jawabanmu kurang tepat</b>Kamu memilih “'+esc(d[1][it.sel])+'”. Pilihan ini tidak sejalan dengan prinsip pengawasan pada pembahasan di atas. Pilihan terbaik adalah “'+esc(d[1][d[2]])+'” karena paling sesuai dengan penalaran AR tersebut.</div>';
+      }else if(S.checked&&it.sel===null){
+        html+='<div class="exp w"><b>Belum dijawab</b>Soal ini dilewati. Pelajari pembahasan di atas.</div>';
+      }
+    }
+    html+='</div>';
+  });
+  if(!html)html='<div class="card res">Tidak ada soal yang salah. Kerja bagus!</div>';
+  $("list").innerHTML=html;
+  $("bCheck").disabled=S.checked;
+  $("bShow").textContent=S.show?"Sembunyikan Jawaban":"Tampilkan Jawaban";
+  $("bShow").disabled=S.checked;
+  var r=$("result"),t=$("tabs");
+  if(S.checked){
+    var pct=Math.round(st.c/D.length*1000)/10;
+    r.className="card res";
+    r.innerHTML='<div>Skor akhir</div><div class="score">'+pct+'%</div><div class="grid"><div><b>'+D.length+'</b><span>Total soal</span></div><div><b>'+st.c+'</b><span>Benar</span></div><div><b>'+(D.length-st.c)+'</b><span>Salah'+(st.u?" ("+st.u+" kosong)":"")+'</span></div></div>';
+    t.className="tabs";
+  }else{r.className="card res hide";t.className="tabs hide"}
+  var tb=t.getElementsByTagName("button");
+  for(var i=0;i<tb.length;i++)tb[i].className="tab"+(tb[i].getAttribute("data-f")===filter?" on":"");
+}
+function scrollTop(){try{window.scrollTo({top:0,behavior:"smooth"})}catch(e){window.scrollTo(0,0)}}
+$("list").addEventListener("click",function(e){
+  var el=e.target;
+  while(el&&el!==this&&!(el.className&&String(el.className).indexOf("opt")>-1))el=el.parentNode;
+  if(!el||el===this||S.checked)return;
+  var p=+el.getAttribute("data-p"),k=+el.getAttribute("data-k");
+  S.items[p].sel=k;persist();
+  var y=window.pageYOffset;render();window.scrollTo(0,y);
+});
+$("bCheck").addEventListener("click",function(){
+  var st=stats();
+  if(st.u>0&&!window.confirm(st.u+" soal belum dijawab. Tetap periksa jawaban?"))return;
+  S.checked=true;S.show=false;filter="all";
+  var h=load(LS+"_h")||{attempts:0,best:0},pct=Math.round(st.c/D.length*1000)/10;
+  h.attempts++;if(pct>h.best)h.best=pct;save(LS+"_h",h);
+  persist();render();scrollTop();
+});
+$("bShow").addEventListener("click",function(){S.show=!S.show;persist();render()});
+$("bRestart").addEventListener("click",function(){
+  if(!S.checked&&stats().a>0&&!window.confirm("Mulai sesi baru? Jawaban saat ini akan hilang."))return;
+  newSession();render();scrollTop();
+});
+$("tabs").addEventListener("click",function(e){
+  var f=e.target.getAttribute&&e.target.getAttribute("data-f");
+  if(f){filter=f;render()}
+});
+var saved=load(LS+"_s");
+if(valid(saved)){S=saved}else{newSession()}
+render();
+})();
+</script>
+</body>
+</html>
